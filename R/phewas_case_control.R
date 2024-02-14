@@ -1,20 +1,29 @@
-# # old dx_code_scan
-# turns out this is much faster than the fisher_phewas function
-phewas_case_control = function(case_pids,
-															 control_pids,
+#' @title phewas for case-control design
+#'
+#' @param case_ids patient ID's of cases
+#' @param control_ids patient ID's of controls
+#' @param phecode_counts tibble of phecodes
+#' @param shrinkage_pseudocounts how many pseudocounts to add to true counts of
+#'	cases/controls with/without disease, default to 5 to decrease sensitivity
+#'	to rare occurrences
+#'
+#' @return odds ratios and p-values for each phecode
+#' @export
+phewas_case_control = function(case_ids,
+															 control_ids,
 															 phecode_counts,
-															 shrinkage_pseudocounts = 1) {
+															 shrinkage_pseudocounts = 5) {
 
   phecode_counts %>%
-		dplyr::filter(person_id %in% c(case_pids, control_pids)) %>%
-		dplyr::mutate(case_or_control = ifelse(person_id %in% case_pids, 'case', 'control')) %>%
+		dplyr::filter(person_id %in% c(case_ids, control_ids)) %>%
+		dplyr::mutate(case_or_control = ifelse(person_id %in% case_ids, 'case', 'control')) %>%
 		dplyr::select(person_id, case_or_control, phecode, phecode_count) %>%
 		dplyr::group_by(phecode) %>%
 		dplyr::summarise(
       case_w = sum(phecode_count >= 2 & case_or_control == 'case'),
-      case_wo = length(case_pids) - sum(phecode_count >= 1 & case_or_control == 'case'),
+      case_wo = length(case_ids) - sum(phecode_count >= 1 & case_or_control == 'case'),
       control_w = sum(phecode_count >= 2 & case_or_control == 'control'),
-      control_wo = length(control_pids) - sum(phecode_count >= 1 & case_or_control == 'control')
+      control_wo = length(control_ids) - sum(phecode_count >= 1 & case_or_control == 'control')
     ) ->
     dx_code_scan
 

@@ -7,6 +7,14 @@ conditionally <- function(fun){
 
 cond_filter <- conditionally(dplyr::filter)
 
+
+#' @title Filter SM one gene
+#'
+#' @param sm_table somatic mutation tibble
+#' @param demog demographics tibble
+#'
+#' @return filtered SM table
+#' @export
 filter_sm_one_gene = function(sm_table, demog) {
 
   stopifnot(lu(sm_table$Gene.refGene) == 1)

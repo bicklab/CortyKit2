@@ -1,7 +1,7 @@
-match_on = function(case_pids, demog_plus, ccr, ...) {
+match_on = function(case_ids, covariates, ccr, ...) {
 
-  demog_plus %>%
-    dplyr::filter(person_id %in% case_pids) %>%
+  covariates %>%
+    dplyr::filter(person_id %in% case_ids) %>%
 		dplyr::group_by(...) %>%
 		dplyr::summarise(
       num_cases = dplyr::n(),
@@ -11,8 +11,8 @@ match_on = function(case_pids, demog_plus, ccr, ...) {
     ) ->
     control_demand_df
 
-  demog_plus %>%
-  	dplyr::filter(person_id %nin% case_pids) %>%
+  covariates %>%
+  	dplyr::filter(person_id %nin% case_ids) %>%
   	dplyr::group_by(...) %>%
   	dplyr::summarise(
       num_controls_avail = dplyr::n(),
@@ -37,18 +37,28 @@ match_on = function(case_pids, demog_plus, ccr, ...) {
 }
 
 
-get_control_ids = function(case_ids, demog_plus, exclude_pids = NULL, control_case_ratio = 10, verbose = FALSE) {
+#' get control ids
+#'
+#' @param case_ids the case ids
+#' @param covariates covariates, some of which will be matched on
+#' @param exclude_ids ids that user does not want to consider as possible controls
+#' @param control_case_ratio number of controls per case, default to 10
+#' @param verbose whether to output what ends up getting matched on
+#'
+#' @return a vector of control ids
+#' @export
+get_control_ids = function(case_ids, covariates, exclude_ids = NULL, control_case_ratio = 10, verbose = FALSE) {
 
-  if (!is.null(exclude_pids)) {
-    if (!purrr::is_empty(base::intersect(case_pids, exclude_pids))) {
+  if (!is.null(exclude_ids)) {
+    if (!purrr::is_empty(base::intersect(case_pids, exclude_ids))) {
       stop('there is overlap between cases and excludes')
     }
-    demog_plus = dplyr::filter(demog_plus, person_id %nin% exclude_pids)
+    covariates = dplyr::filter(covariates, person_id %nin% exclude_ids)
   }
 
   mo = purrr::possibly(
     .f = function(...) {
-      match_on(case_pids, demog_plus, ccr = control_case_ratio, ...)
+      match_on(case_pids, covariates, ccr = control_case_ratio, ...)
     },
     otherwise = 'nomatch'
   )

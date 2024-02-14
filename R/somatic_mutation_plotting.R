@@ -1,4 +1,10 @@
-
+#' @title make prevalence plot
+#'
+#' @param cases tibble of cases
+#' @param demog tibble of demographic info
+#'
+#' @return the plot
+#' @export
 make_prevalence_plot = function(cases, demog) {
 
   demog %>%
@@ -17,6 +23,12 @@ make_prevalence_plot = function(cases, demog) {
 		ggplot2::theme_bw()
 }
 
+#' @title make age-vaf plot
+#'
+#' @param cases tibble of cases
+#'
+#' @return the plot
+#' @export
 make_age_VAF_plot = function(cases) {
 
   cases %>%
@@ -38,6 +50,12 @@ make_age_VAF_plot = function(cases) {
 		ggplot2::scale_shape_discrete(name = 'genetic sex')
 }
 
+#' @title make position-vaf plot
+#'
+#' @param cases tibble of cases
+#'
+#' @return the plot
+#' @export
 make_pos_VAF_plot = function(cases) {
 
   cases %>%
