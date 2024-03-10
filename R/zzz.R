@@ -1,0 +1,4 @@
+.onLoad = function() {
+	GOOGLE_PROJECT = Sys.getenv('GOOGLE_PROJECT')
+	GOOGLE_BUCKET = Sys.getenv('WORKSPACE_BUCKET')
+}
