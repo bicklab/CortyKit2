@@ -1,22 +1,22 @@
+#' @importFrom rlang .data
 match_on = function(case_ids, covariates, ccr, ...) {
 
-  covariates %>%
-    dplyr::filter(person_id %in% case_ids) %>%
+	covariates %>%
+    dplyr::filter(.data$person_id %in% case_ids) %>%
 		dplyr::group_by(...) %>%
 		dplyr::summarise(
-      num_cases = dplyr::n(),
-      num_controls_needed = ccr*num_cases,
-      case_pids = list(person_id),
+      num_controls_needed = ccr*dplyr::n(),
+      case_pids = list(.data$person_id),
       .groups = 'drop'
     ) ->
     control_demand_df
 
   covariates %>%
-  	dplyr::filter(person_id %nin% case_ids) %>%
+  	dplyr::filter(.data$person_id %nin% case_ids) %>%
   	dplyr::group_by(...) %>%
   	dplyr::summarise(
       num_controls_avail = dplyr::n(),
-      avail_control_pids = list(person_id),
+      avail_control_pids = list(.data$person_id),
       .groups = 'drop'
     ) ->
     control_supply_df
@@ -27,13 +27,13 @@ match_on = function(case_ids, covariates, ccr, ...) {
   	dplyr::left_join(control_supply_df, by = dplyr::join_by(...)) %>%
     # can use this to figure out if matching will succeed
     # mutate(deficit = num_controls_needed - num_controls_avail) %>% filter(deficit > 0) %>% arrange(deficit)
-  	mutate(control_pids = purrr::map2_chr(.x = avail_control_pids,
-  																				.y = num_controls_needed,
-  																				.f = sample, replace = FALSE)) %>%
-    pull(control_pids) %>% unlist() ->
-    control_pids
-
-  return(control_pids)
+  	dplyr::mutate(control_pids = purrr::map2_chr(
+  		.x = .data$avail_control_pids,
+  		.y = .data$num_controls_needed,
+  		.f = sample,
+  		replace = FALSE)) %>%
+    dplyr::pull(.data$control_pids) %>% unlist()  %>%
+  	return()
 }
 
 
@@ -50,40 +50,40 @@ match_on = function(case_ids, covariates, ccr, ...) {
 get_control_ids = function(case_ids, covariates, exclude_ids = NULL, control_case_ratio = 10, verbose = FALSE) {
 
   if (!is.null(exclude_ids)) {
-    if (!purrr::is_empty(base::intersect(case_pids, exclude_ids))) {
+    if (!purrr::is_empty(intersect(case_ids, exclude_ids))) {
       stop('there is overlap between cases and excludes')
     }
-    covariates = dplyr::filter(covariates, person_id %nin% exclude_ids)
+    covariates = dplyr::filter(covariates, .data$person_id %nin% exclude_ids)
   }
 
   mo = purrr::possibly(
     .f = function(...) {
-      match_on(case_pids, covariates, ccr = control_case_ratio, ...)
+      match_on(.data$case_pids, .data$covariates, ccr = control_case_ratio, ...)
     },
     otherwise = 'nomatch'
   )
 
   # try very stringent matching
-  m = mo(age_at_biosample, dragen_sex_ploidy, ancestry_pred)
+  m = mo(.data$age_at_biosample, .data$dragen_sex_ploidy, .data$ancestry_pred)
   if (!identical(m, 'nomatch')) {
     if (verbose) { cat('matched on age, sex, and ancestry\n') }
     return(m)
   }
 
   # try sequentially less-stringent matching until one works
-  m = mo(decade_at_biosample, dragen_sex_ploidy, ancestry_pred)
+  m = mo(.data$decade_at_biosample, .data$dragen_sex_ploidy, .data$ancestry_pred)
   if (!identical(m, 'nomatch')) {
     if (verbose) { cat('matched on decade, sex, and ancestry\n') }
     return(m)
   }
 
-  m = mo(age_at_biosample, dragen_sex_ploidy)
+  m = mo(.data$age_at_biosample, .data$dragen_sex_ploidy)
   if (!identical(m, 'nomatch')) {
     if (verbose) { cat('matched on age and sex (no ancestry)\n') }
     return(m)
   }
 
-  m = mo(decade_at_biosample, dragen_sex_ploidy)
+  m = mo(.data$decade_at_biosample, .data$dragen_sex_ploidy)
   if (!identical(m, 'nomatch')) {
     if (verbose) { cat('matched on decade and sex (no ancestry)\n') }
     return(m)

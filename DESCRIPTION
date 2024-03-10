@@ -23,7 +23,8 @@ Imports:
     glue,
     magrittr,
     purrr,
-    readr,
     rlang,
     scales,
-    tidyr
+    stats,
+    tidyr,
+    utils

@@ -7,9 +7,28 @@
 filter_sm_one_gene(sm_table, demog)
 }
 \arguments{
-\item{sm_table}{somatic mutation tibble}
+\item{sm_table}{somatic mutation tibble with the following columns:
+'person_id' of type character contains person ID's
+'chr' of type character is the chromosome of the variant
+'pos' of type integer is the genomic position of the variant
+'ref' of type character is the reference allele
+'alt' of type character is the alternate allele
+'gene_name' of type character is the name of the gene the variants maps to
+'func' of type character is the functional significance of the variant
 
-\item{demog}{demographics tibble}
+'DP' of type integer conatains total read depth
+'AD_1' of type integer contains read depth for most common allele
+'AD_2' of type integer contains read depth for second most common allele
+'AD_3' of type integer contains read depth for the third most commone allele or NA for the many bi-allelic variants
+'watson_2' of type integer is the forward read depth of the second most common allele
+'crick_2' of type integer is the reverse read depth of the second most common allele
+
+person ID must be in a column named 'person_id' of type character
+read depth must be in a column named 'DP' of type integer}
+
+\item{demog}{demographics tibble with the following columns:
+'person_id' of type character contains person ID's
+'bio_sex' of type character which contains biological sex ('XX' or 'XY')}
 }
 \value{
 filtered SM table

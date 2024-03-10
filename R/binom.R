@@ -13,5 +13,5 @@ binom_p_val = function(a, b = n - a, n = a + b, null_prob = 0.5) {
 
 
 slow_binom_p_val = function(a, b = n - a, n = a + b) {
-  binom.test(x = a, n = a + b)$p.value
+  stats::binom.test(x = a, n = a + b)$p.value
 }

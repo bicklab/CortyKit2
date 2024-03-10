@@ -8,7 +8,7 @@
 commonest_values <- function(v, n = 5) {
   table(v, useNA = 'ifany') %>%
     sort(decreasing = TRUE) %>%
-    head(n = n) %>%
+    utils::head(n = n) %>%
     names()
 }
 

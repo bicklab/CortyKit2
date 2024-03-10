@@ -9,10 +9,14 @@
 #'
 #' @return odds ratios and p-values for each phecode
 #' @export
-phewas_case_control = function(case_ids,
-															 control_ids,
-															 phecode_counts,
-															 shrinkage_pseudocounts = 5) {
+phewas_case_control = function(
+		case_ids,
+		control_ids,
+		phecode_counts,
+		shrinkage_pseudocounts = 5) {
+
+	person_id = case_or_control = 'fake_global'
+	phecode = phecode_count = 'fake_global'
 
   phecode_counts %>%
 		dplyr::filter(person_id %in% c(case_ids, control_ids)) %>%
@@ -30,7 +34,7 @@ phewas_case_control = function(case_ids,
   ms = list()
   ors = list()
   for (i in 1:nrow(dx_code_scan)) {
-    ms[[i]] = base::matrix(
+    ms[[i]] = matrix(
       c(dx_code_scan$control_wo[i],
         dx_code_scan$control_w[i],
         dx_code_scan$case_wo[i],

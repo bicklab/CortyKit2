@@ -18,7 +18,7 @@ checkpoint = function(x, dir, local_disk = TRUE, google_bucket = TRUE) {
 		if (local_disk) { arrow::write_csv_arrow(x = x, file = pd_file_path) }
 		if (google_bucket) {
 			gsutil('-m cp {pd_file_path} {GOOGLE_BUCKET}/{dir}/')
-			if (rlang::is_empty(system(glue('gsutil ls {gcs_file_path}'), intern = TRUE))) {
+			if (rlang::is_empty(system(glue::glue('gsutil ls {gcs_file_path}'), intern = TRUE))) {
 				stop('failed to save to GCS')
 			}
 			return(x)
