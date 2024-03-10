@@ -18,13 +18,18 @@ Suggests:
 Config/testthat/edition: 3
 Depends: 
     arrow,
+    broom,
     dplyr,
     ggplot2,
+    ggsurvfit,
+    glmnet,
     glue,
     magrittr,
     purrr,
     rlang,
     scales,
     stats,
+    survival,
+    survminer,
     tidyr,
     utils
