@@ -28,15 +28,3 @@ Depends:
     stats,
     tidyr,
     utils
-Imports: 
-    arrow,
-    dplyr,
-    ggplot2,
-    glue,
-    magrittr,
-    purrr,
-    rlang,
-    scales,
-    stats,
-    tidyr,
-    utils
