@@ -4,8 +4,8 @@ Version: 0.0.0.1
 Authors@R: 
     person("Robert", "Corty", , "rcorty@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-6787-9051"))
-Description: This package offers a variety of semi-related utility
-	functions that I've had to write as part of my work. It's package to 
+Description: This package has a collection semi-related utility
+	functions that I've had to write as part of my work. It's packaged to 
 	facilitate their use across computing environments.
 License: GPL (>= 3)
 Encoding: UTF-8
@@ -16,6 +16,18 @@ BugReports: https://github.com/bicklab/CortyKit2/issues
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Depends: 
+    arrow,
+    dplyr,
+    ggplot2,
+    glue,
+    magrittr,
+    purrr,
+    rlang,
+    scales,
+    stats,
+    tidyr,
+    utils
 Imports: 
     arrow,
     dplyr,

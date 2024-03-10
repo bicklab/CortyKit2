@@ -6,7 +6,7 @@
 \alias{CortyKit2-package}
 \title{CortyKit2: Robert Corty's Utility Functions}
 \description{
-This package offers a variety of semi-related utility functions that I've had to write as part of my work. It's package to facilitate their use across computing environments.
+This package has a collection semi-related utility functions that I've had to write as part of my work. It's packaged to facilitate their use across computing environments.
 }
 \seealso{
 Useful links:
