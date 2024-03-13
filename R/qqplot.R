@@ -11,8 +11,9 @@
 qqunif = function(ps) {
 	ps = na.omit(ps)
 	n = length(ps)
-	xs = (1:n)/n
-	ys = sort(ps)
-	plot(-log10(xs), -log10(ys), asp = 1)
+	xs = -log10((1:n)/n)
+	ys = -log10(sort(ps))
+	themax = max(c(xs, ys))
+	plot(x = xs, y = ys, xlim = c(0, themax), ylim = c(0, themax))
 	abline(a = 0, b = 1)
 }
