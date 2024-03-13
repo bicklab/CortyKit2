@@ -24,6 +24,7 @@ Depends:
     glmnet,
     glue,
     magrittr,
+    rlang,
     scales,
     stats,
     survival,
@@ -31,3 +32,5 @@ Depends:
     tictoc,
     tidyverse,
     utils
+Imports: 
+    graphics
