@@ -1,9 +1,9 @@
 #' @importFrom rlang .data
-match_on = function(case_ids, covariates, ccr, ...) {
+match_on = function(case_ids, data, match_vars, ccr) {
 
-	covariates %>%
+	data %>%
     dplyr::filter(.data$person_id %in% case_ids) %>%
-		dplyr::group_by(...) %>%
+		dplyr::group_by(!!!rlang::syms(match_vars)) %>%
 		dplyr::summarise(
       num_controls_needed = ccr*dplyr::n(),
       case_pids = list(.data$person_id),
@@ -11,9 +11,9 @@ match_on = function(case_ids, covariates, ccr, ...) {
     ) ->
     control_demand_df
 
-  covariates %>%
+  data %>%
   	dplyr::filter(.data$person_id %nin% case_ids) %>%
-  	dplyr::group_by(...) %>%
+  	dplyr::group_by(!!!rlang::syms(match_vars)) %>%
   	dplyr::summarise(
       num_controls_avail = dplyr::n(),
       avail_control_pids = list(.data$person_id),
@@ -24,7 +24,7 @@ match_on = function(case_ids, covariates, ccr, ...) {
   set.seed(1)
 
   control_demand_df %>%
-  	dplyr::left_join(control_supply_df, by = dplyr::join_by(...)) %>%
+  	dplyr::left_join(control_supply_df, by = dplyr::join_by(!!!rlang::syms(match_vars))) %>%
     # can use this to figure out if matching will succeed
     # mutate(deficit = num_controls_needed - num_controls_avail) %>% filter(deficit > 0) %>% arrange(deficit)
   	dplyr::mutate(control_pids = purrr::map2_chr(
@@ -40,54 +40,55 @@ match_on = function(case_ids, covariates, ccr, ...) {
 #' get control ids
 #'
 #' @param case_ids the case ids
-#' @param covariates covariates, some of which will be matched on
+#' @param match_variables vector of variables to match on in order from most important to least
+#' @param data data used for matching, with id column labeled 'person_id'
 #' @param exclude_ids ids that user does not want to consider as possible controls
 #' @param control_case_ratio number of controls per case, default to 10
 #' @param verbose whether to output what ends up getting matched on
 #'
 #' @return a vector of control ids
 #' @export
-get_control_ids = function(case_ids, covariates, exclude_ids = NULL, control_case_ratio = 10, verbose = FALSE) {
+get_control_ids = function(case_ids,
+													 match_variables,
+													 data,
+													 exclude_ids = NULL,
+													 control_case_ratio = 5,
+													 verbose = FALSE) {
 
-  if (!is.null(exclude_ids)) {
-    if (!purrr::is_empty(intersect(case_ids, exclude_ids))) {
-      stop('there is overlap between cases and excludes')
+	# check inputs
+	if (!all(case_ids %in% data$person_id)) {
+		stop("Some case_id's aren't in data.")
+	}
+	if (!is.null(exclude_ids)) {
+		if (!all(exclude_ids %in% data$person_id)) {
+			stop("Some exclude_id's aren't in data.")
+		}
+		if (!purrr::is_empty(intersect(case_ids, exclude_ids))) {
+      stop("There is overlap between case_id's and exclude_id's.")
     }
     covariates = dplyr::filter(covariates, .data$person_id %nin% exclude_ids)
+	}
+	if (!all(match_variables %in% names(data))) {
+		stop("Some match_variable's aren't in data.")
+	}
+
+  mo = purrr::possibly(match_on, otherwise = 'nomatch')
+  result = 'nomatch'
+
+  # try to match on a shorter and shorter list of variables until it works
+  # if it doesn't work even with 1 variable, return 'nomatch'
+  while(result == 'nomatch') {
+
+  	result = mo(case_ids = case_ids,
+  							match_variables = match_variables,
+  							data = data,
+  							ccr = control_case_ratio)
+
+  	match_variables = match_variables[-length(match_variables)]
+  	if (length(match_variables) == 0) {
+  		break
+  	}
   }
 
-  mo = purrr::possibly(
-    .f = function(...) {
-      match_on(.data$case_pids, .data$covariates, ccr = control_case_ratio, ...)
-    },
-    otherwise = 'nomatch'
-  )
-
-  # try very stringent matching
-  m = mo(.data$age_at_biosample, .data$dragen_sex_ploidy, .data$ancestry_pred)
-  if (!identical(m, 'nomatch')) {
-    if (verbose) { cat('matched on age, sex, and ancestry\n') }
-    return(m)
-  }
-
-  # try sequentially less-stringent matching until one works
-  m = mo(.data$decade_at_biosample, .data$dragen_sex_ploidy, .data$ancestry_pred)
-  if (!identical(m, 'nomatch')) {
-    if (verbose) { cat('matched on decade, sex, and ancestry\n') }
-    return(m)
-  }
-
-  m = mo(.data$age_at_biosample, .data$dragen_sex_ploidy)
-  if (!identical(m, 'nomatch')) {
-    if (verbose) { cat('matched on age and sex (no ancestry)\n') }
-    return(m)
-  }
-
-  m = mo(.data$decade_at_biosample, .data$dragen_sex_ploidy)
-  if (!identical(m, 'nomatch')) {
-    if (verbose) { cat('matched on decade and sex (no ancestry)\n') }
-    return(m)
-  }
-
-  return('nomatch')
+  return(result)
 }

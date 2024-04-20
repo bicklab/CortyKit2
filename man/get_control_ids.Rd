@@ -6,16 +6,19 @@
 \usage{
 get_control_ids(
   case_ids,
-  covariates,
+  match_variables,
+  data,
   exclude_ids = NULL,
-  control_case_ratio = 10,
+  control_case_ratio = 5,
   verbose = FALSE
 )
 }
 \arguments{
 \item{case_ids}{the case ids}
 
-\item{covariates}{covariates, some of which will be matched on}
+\item{match_variables}{vector of variables to match on in order from most important to least}
+
+\item{data}{data used for matching, with id column labeled 'person_id'}
 
 \item{exclude_ids}{ids that user does not want to consider as possible controls}
 

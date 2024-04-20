@@ -20,17 +20,20 @@ Depends:
     arrow,
     broom,
     data.table,
+    dplyr,
+    ggplot2,
     ggsurvfit,
     glmnet,
     glue,
     magrittr,
+    purrr,
     rlang,
     scales,
     stats,
     survival,
     survminer,
     tictoc,
-    tidyverse,
+    tidyr,
     utils
 Imports: 
     graphics

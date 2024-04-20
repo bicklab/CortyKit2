@@ -11,7 +11,7 @@ checkpoint = function(x, dir, local_disk = TRUE, google_bucket = TRUE) {
 
 	var_name = deparse(substitute(x))
 	pd_file_path = glue::glue('~/{dir}/{var_name}.csv')
-	gcs_file_path = glue::glue('{GOOGLE_BUCKET}/{dir}/{var_name}.csv')
+	gcs_file_path = glue::glue('{WORKSPACE_BUCKET}/{dir}/{var_name}.csv')
 
 	# if the variable is in the R session, save it to PD and/or GCS
 	if (var_name %in% ls(parent.env(environment()))) {
