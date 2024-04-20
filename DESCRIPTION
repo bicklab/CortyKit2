@@ -25,15 +25,15 @@ Depends:
     ggsurvfit,
     glmnet,
     glue,
+    graphics,
     magrittr,
     purrr,
     rlang,
     scales,
     stats,
+    stringr,
     survival,
     survminer,
     tictoc,
     tidyr,
     utils
-Imports: 
-    graphics
