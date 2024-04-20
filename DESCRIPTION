@@ -29,6 +29,7 @@ Depends:
     magrittr,
     naniar,
     purrr,
+    readr,
     rlang,
     scales,
     stats,
