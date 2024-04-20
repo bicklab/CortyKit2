@@ -27,6 +27,7 @@ Depends:
     glue,
     graphics,
     magrittr,
+    naniar,
     purrr,
     rlang,
     scales,
