@@ -22,8 +22,10 @@ gsls = function(uri, echo = TRUE) {
 
 	result = gsutil(paste('ls', uri))
 
-	if (length(result == 1))
+	if (length(result == 1)) {
+		message('one result:')
 		return(result)
+	}
 
 	prefix = purrr::reduce(result, lcprefix_val)
 	message('all results of gsutil ls start with ', prefix)
