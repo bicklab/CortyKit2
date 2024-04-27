@@ -7,18 +7,13 @@
 #' @export
 .onLoad = function(libname, pkgname) {
 
-	GOOGLE_PROJECT <<- Sys.getenv('GOOGLE_PROJECT')
-	WORKSPACE_BUCKET <<- Sys.getenv('WORKSPACE_BUCKET')
+	# on terra.bio
+	if (Sys.getenv('TERRA_DEPLOYMENT_ENV') == 'prod') {
+		WORKSPACE_BUCKET <<- Sys.getenv('WORKSPACE_BUCKET')
+		WORKSPACE_NAME <<- Sys.getenv('WORKSPACE_NAME')
+		WORKSPACE_NAMESPACE <<- Sys.getenv('WORKSPACE_NAMESPACE')
+	}
 
-	# assign(
-	# 	"GOOGLE_PROJECT",
-	# 	Sys.getenv('GOOGLE_PROJECT'),
-	# 	envir = parent.env(environment()))
-	#
-	# assign(
-	# 	"GOOGLE_BUCKET",
-	# 	Sys.getenv('WORKSPACE_BUCKET'),
-	# 	envir = parent.env(environment()))
 
 	invisible()
 }
