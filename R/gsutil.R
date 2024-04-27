@@ -22,9 +22,8 @@ gsls = function(uri, echo = TRUE) {
 
 	result = gsutil(paste('ls', uri))
 
-	if (length(result == 1)) {
+	if (length(result) == 1) {
 		message('one result:')
-		message(str(result))
 		return(result)
 	}
 
