@@ -19,7 +19,20 @@ gsutil = function(text, echo = FALSE) {
 #' @return terminal output from gsutil command
 #' @export
 gsls = function(uri, echo = TRUE) {
-	gsutil(paste('ls', uri))
+
+	result = gsutil(paste('ls', uri))
+
+	if (length(result == 1))
+		return(result)
+
+	prefix = purrr::reduce(result, lcprefix_val)
+	message('all results of gsutil ls start with ', prefix)
+	return(stringr::str_sub(result, length(prefix), -1))
+
+}
+
+lcprefix_val = function(s1, s2) {
+	return(stringr::str_sub(s1, 1, Biostrings::lcprefix(s1, s2)))
 }
 
 #' @title gscp
