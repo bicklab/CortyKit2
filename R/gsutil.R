@@ -29,7 +29,7 @@ gsls = function(uri, echo = TRUE) {
 
 	prefix = purrr::reduce(result, lcprefix_val)
 	message('all results of gsutil ls start with ', prefix)
-	return(stringr::str_sub(result, length(prefix), -1))
+	return(stringr::str_sub(result, nchar(prefix), -1))
 
 }
 
