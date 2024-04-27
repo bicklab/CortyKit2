@@ -26,10 +26,22 @@ gsls = function(uri, echo = TRUE) {
 #'
 #' @param src source
 #' @param dest destination
-#' @param echo whether to print the command to screen before submitting to terminal#'
+#' @param echo whether to print the command to screen before submitting to terminal
 #'
 #' @return terminal output from gsutil command
 #' @export
 gscp = function(src, dest, echo = TRUE) {
 	gsutil(paste('cp', src, dest))
+}
+
+#' @title gsmv
+#'
+#' @param src source
+#' @param dest destination
+#' @param echo whether to print the command to screen before submitting to terminal
+#'
+#' @return terminal output from gsutil command
+#' @export
+gsmv = function(src, dest, echo = TRUE) {
+	gsutil(paste('mv', src, dest))
 }
