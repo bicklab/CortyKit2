@@ -14,6 +14,13 @@
 		WORKSPACE_NAMESPACE <<- Sys.getenv('WORKSPACE_NAMESPACE')
 	}
 
+	# on allofus
+	if (Sys.getenv('AOU_DOCKER_VERSION') != '') {
+		WORKSPACE_BUCKET <<- Sys.getenv('WORKSPACE_BUCKET')
+		WORKSPACE_NAME <<- Sys.getenv('WORKSPACE_NAME')
+		WORKSPACE_NAMESPACE <<- Sys.getenv('WORKSPACE_NAMESPACE')
+	}
+
 
 	invisible()
 }
