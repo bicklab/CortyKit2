@@ -16,7 +16,7 @@ BugReports: https://github.com/bicklab/CortyKit2/issues
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-Depends: 
+Imports: 
     arrow,
     Biostrings,
     broom,
@@ -39,4 +39,6 @@ Depends:
     survminer,
     tictoc,
     tidyr,
-    utils
+    utils,
+    future,
+    furrr
