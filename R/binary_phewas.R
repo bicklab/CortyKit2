@@ -15,12 +15,12 @@ binary_phewas = function(covars,
 												 min_num_cases = 5) {
 
 	# cannot function if there are phecodes observed that lack info
-	obs_phecodes = unique(phecodes$phecodeX)
+	obs_phecodes = unique(phecodes$phecode)
 	if (any(obs_phecodes %nin% phecode_info$phecode))
 		stop('There is at least one phecode that appears in [phecodes] but not in [phecode_info]')
 
 	# only need info on observed phecodes
-	phecode_info = filter(phecode_info, phecode %in% unique(phecodes$phecodeX))
+	phecode_info = filter(phecode_info, phecode %in% unique(phecodes$phecode))
 
 	# only use phecode counts that are in great enough quantity
 	# to be believed
@@ -55,7 +55,7 @@ binary_phewas_one_chunk = function(phecode_info_chunk) {
 			this_covars = covars
 
 		phecodes %>%
-			filter(phecodeX == this_phecode) |>
+			filter(phecode == this_phecode) |>
 			pull(person_id) ->
 			pids_w_phecode
 
