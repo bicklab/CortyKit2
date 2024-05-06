@@ -1,11 +1,14 @@
 binary_phewas = function(covars, phecodes, phecode_info, min_num_codes = 4) {
 
-	obs_phecodes = unique(phecodes$phecodeX)
+	# ensure we have INFO on all the phecodes that have been observed
+	obs_phecodes = unique(phecodes$phecode)
 	if (any(obs_phecodes %nin% phecode_info$phecode)) {
 		stop('There is at least one phecode that appears in [phecodes] but not in [phecode_info]')
 	}
-	phecode_info = filter(phecode_info, phecode %in% unique(phecodes$phecodeX))
+	# and remove the INFO pertaining to the unobserved ones
+	phecode_info = filter(phecode_info, phecode %in% unique(phecodes$phecode))
 
+	# loop over phecodes listed in INFO
 	results = list()
 	for (this_phecode_idx in 1:nrow(phecode_info)) {
 
@@ -21,9 +24,8 @@ binary_phewas = function(covars, phecodes, phecode_info, min_num_codes = 4) {
 		if (this_sex == 'Both')
 			this_covars = covars
 
-
 		phecodes %>%
-			filter(phecodeX == this_phecode, n >= min_num_codes) |>
+			filter(phecode == this_phecode, phecode_count >= min_num_codes) |>
 			pull(person_id) ->
 			pids_w_phecode
 
@@ -31,7 +33,7 @@ binary_phewas = function(covars, phecodes, phecode_info, min_num_codes = 4) {
 			mutate(has_phecode = person_id %in% pids_w_phecode) ->
 			to_glm
 
-		glm(formula = has_phecode ~ ., data = to_glm) |>
+		glm(formula = has_phecode ~ ., data = select(to_glm, -person_id)) |>
 			broom::tidy() |>
 			mutate(phecode = this_phecode) ->
 			results[[this_phecode]]
