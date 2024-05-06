@@ -1,7 +1,18 @@
-binary_phewas = function(covars, phecodes, phecode_info,
+#' @title phewas
+#'
+#' @param covars the covariates (predictors) of the logistic glm
+#' @param phecodes table of phecodes
+#' @param phecode_info information abou the phecodes
+#' @param min_num_codes minimum number of codes a person must have to count as having the phecode
+#' @param min_num_cases minimum number of cases of a phecode that must be observed to consider it worth testing
+#'
+#' @return a table of results
+#' @export
+binary_phewas = function(covars,
+												 phecodes,
+												 phecode_info,
 												 min_num_codes = 4,
-												 min_num_cases = 5,
-												 num_cores = 18) {
+												 min_num_cases = 5) {
 
 	# cannot function if there are phecodes observed that lack info
 	obs_phecodes = unique(phecodes$phecodeX)
@@ -15,17 +26,24 @@ binary_phewas = function(covars, phecodes, phecode_info,
 	# to be believed
 	phecodes = filter(phecodes, phecode_count >= min_num_codes)
 
+	# set up multisession evaluation, then split the work across workers
+	future::plan(strategy = multisession)
+
 	phecode_info |>
-		group_by(category) |>
-		group_split() |>
-		future_map(binary_phewas_)
+		dplyr::group_by(category) |>
+		dplyr::group_split() |>
+		furrr::future_map_dfr(binary_phewas_one_chunk) ->
+		result
 
+		return(result)
+}
 
-		results = list()
-	for (phecode_idx in 1:nrow(phecode_info)) {
+binary_phewas_one_chunk = function(phecode_info_chunk) {
 
-		this_phecode = phecode_info$phecode[phecode_idx]
-		this_sex = phecode_info$sex[phecode_idx]
+	for (phecode_idx in 1:nrow(phecode_info_chunk)) {
+
+		this_phecode = phecode_info_chunk$phecode[phecode_idx]
+		this_sex = phecode_info_chunk$sex[phecode_idx]
 
 		if (this_sex == 'Male')
 			this_covars = filter(covars, sex_male == TRUE)
@@ -54,4 +72,5 @@ binary_phewas = function(covars, phecodes, phecode_info,
 			results[[this_phecode]]
 	}
 	return(bind_rows(results))
+
 }
