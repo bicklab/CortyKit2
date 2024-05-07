@@ -13,7 +13,7 @@ binary_phewas = function(covars,
 												 phecode_info,
 												 min_num_codes = 4,
 												 min_num_cases = 5,
-												 num_cores = 1) {
+												 use_all_cores = TRUE) {
 
 	# only use phecode counts that are in great enough quantity
 	# to be believed
@@ -39,35 +39,35 @@ binary_phewas = function(covars,
 		split(~ phecode_prefix) ->
 		phecode_counts_split
 
-	if (num_cores == 1) {
+	if (use_all_cores == FALSE) {
 
-		# outer_results = list()
-		# for (n in names(phecode_info_split)) {
-		#
-		# 	message('starting on ', n)
-		# 	binary_phewas_one_chunk(
-		# 		phecode_info_chunk = phecode_info_split[[n]],
-		# 		phecodes_chunk = phecode_counts_split[[n]],
-		# 		covars = covars,
-		# 		min_num_cases = min_num_cases
-		# 	) ->
-		# 		outer_results[[n]]
-		# }
-		# return(bind_rows(outer_results))
+		outer_results = list()
+		for (n in names(phecode_info_split)) {
 
-		message('Running PheWAS on 1 core.')
-		return(
-			purrr::list_rbind(
-				purrr::map2(
-					.x = phecode_info_split,
-					.y = phecode_counts_split,
-					.f = binary_phewas_one_chunk,
-					covars = covars,
-					min_num_cases = min_num_cases,
-					.progress = TRUE
-				)
-			)
-		)
+			message('starting on ', n)
+			binary_phewas_one_chunk(
+				phecode_info_chunk = phecode_info_split[[n]],
+				phecodes_chunk = phecode_counts_split[[n]],
+				covars = covars,
+				min_num_cases = min_num_cases
+			) ->
+				outer_results[[n]]
+		}
+		return(bind_rows(outer_results))
+
+		# message('Running PheWAS on 1 core.')
+		# return(
+		# 	purrr::list_rbind(
+		# 		purrr::map2(
+		# 			.x = phecode_info_split,
+		# 			.y = phecode_counts_split,
+		# 			.f = binary_phewas_one_chunk,
+		# 			covars = covars,
+		# 			min_num_cases = min_num_cases,
+		# 			.progress = TRUE
+		# 		)
+		# 	)
+		# )
 	}
 
 	message('Running PheWAS on ', future::availableCores() , ' cores.')
