@@ -12,7 +12,8 @@ binary_phewas = function(covars,
 												 phecode_counts,
 												 phecode_info,
 												 min_num_codes = 4,
-												 min_num_cases = 5) {
+												 min_num_cases = 5,
+												 num_cores = 1) {
 
 	# only use phecode counts that are in great enough quantity
 	# to be believed
@@ -38,6 +39,21 @@ binary_phewas = function(covars,
 		split(~ phecode_prefix) ->
 		phecode_counts_split
 
+	if (num_cores == 1) {
+		return(
+			purrr::list_rbind(
+				purrr::map2(
+					.x = phecode_info_split,
+					.y = phecode_counts_split,
+					.f = binary_phewas_one_chunk,
+					covars = covars,
+					min_num_cases = min_num_cases,
+					.progress = TRUE
+				)
+			)
+		)
+	}
+
 	return(
 		furrr::future_map2_dfr(
 			.x = phecode_info_split,
@@ -48,6 +64,7 @@ binary_phewas = function(covars,
 			.progress = TRUE
 		)
 	)
+
 }
 
 binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, min_num_cases) {
@@ -76,10 +93,10 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 			next
 
 		covars %>%
-			mutate(has_phecode = person_id %in% pids_w_phecode) |>
-			glm(formula = has_phecode ~ ., family = 'binomial') |>
+			dplyr::mutate(has_phecode = person_id %in% pids_w_phecode) |>
+			purrr::safely(function(x) stats::glm(formula = has_phecode ~ ., family = 'binomial', data = x)) |>
 			broom::tidy() |>
-			mutate(phecode = this_phecode) ->
+			dplyr::mutate(phecode = this_phecode) ->
 			results[[this_phecode]]
 	}
 	return(bind_rows(results))
