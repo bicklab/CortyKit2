@@ -113,22 +113,18 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 			next
 		}
 
-		safe_glm = safely(function(x) stats::lm(formula = has_phecode ~ .,
-																						# family = 'binomial',
+		safe_glm = safely(function(x) stats::glm(formula = has_phecode ~ . ,
+																						family = 'binomial',
 																						data = x))
 
 		covars %>%
-			dplyr::mutate(has_phecode = person_id %in% pids_w_phecode) ->
-			to_glm
-		# glimpse(to_glm)
-
-		safe_glm(to_glm) |>
+			dplyr::mutate(has_phecode = person_id %in% pids_w_phecode) |>
+			select(-person_id)  |>
+			safe_glm(to_glm) |>
 			pluck('result') |>
 			broom::tidy() |>
 			dplyr::mutate(phecode = this_phecode) ->
-			result
-
-		inner_results[[this_phecode]] = result
+			inner_results[[this_phecode]]
 	}
 	return(bind_rows(inner_results))
 
