@@ -41,34 +41,36 @@ binary_phewas = function(covars,
 
 	if (num_cores == 1) {
 
-		outer_results = list()
-		for (n in names(phecode_info_split)) {
+		# outer_results = list()
+		# for (n in names(phecode_info_split)) {
+		#
+		# 	message('starting on ', n)
+		# 	binary_phewas_one_chunk(
+		# 		phecode_info_chunk = phecode_info_split[[n]],
+		# 		phecodes_chunk = phecode_counts_split[[n]],
+		# 		covars = covars,
+		# 		min_num_cases = min_num_cases
+		# 	) ->
+		# 		outer_results[[n]]
+		# }
+		# return(bind_rows(outer_results))
 
-			message('starting on ', n)
-			binary_phewas_one_chunk(
-				phecode_info_chunk = phecode_info_split[[n]],
-				phecodes_chunk = phecode_counts_split[[n]],
-				covars = covars,
-				min_num_cases = min_num_cases
-			) ->
-				outer_results[[n]]
-		}
-		return(bind_rows(outer_results))
-
-		# return(
-		# 	purrr::list_rbind(
-		# 		purrr::map2(
-		# 			.x = phecode_info_split,
-		# 			.y = phecode_counts_split,
-		# 			.f = binary_phewas_one_chunk,
-		# 			covars = covars,
-		# 			min_num_cases = min_num_cases,
-		# 			.progress = TRUE
-		# 		)
-		# 	)
-		# )
+		message('Running PheWAS on 1 core.')
+		return(
+			purrr::list_rbind(
+				purrr::map2(
+					.x = phecode_info_split,
+					.y = phecode_counts_split,
+					.f = binary_phewas_one_chunk,
+					covars = covars,
+					min_num_cases = min_num_cases,
+					.progress = TRUE
+				)
+			)
+		)
 	}
 
+	message('Running PheWAS on ', future::availableCores() , ' cores.')
 	return(
 		furrr::future_map2_dfr(
 			.x = phecode_info_split,
