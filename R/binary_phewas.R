@@ -91,8 +91,8 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 
 		this_phecode = phecode_info_chunk$phecode[phecode_idx]
 		this_sex = phecode_info_chunk$sex[phecode_idx]
-		message('starting on ', phecode_idx, ' of ', nrow(phecode_info_chunk), '...')
-		message(this_phecode, ' applies to ', this_sex)
+		# message('starting on ', phecode_idx, ' of ', nrow(phecode_info_chunk), '...')
+		# message(this_phecode, ' applies to ', this_sex)
 
 		if (this_sex == 'Male')
 			this_covars = filter(covars, sex_male == TRUE)
@@ -103,7 +103,7 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 		if (this_sex == 'Both')
 			this_covars = covars
 
-		message('covars has dim: ', dim(this_covars))
+		# message('covars has dim: ', dim(this_covars))
 
 		# need to pull this into the map somehow!
 		phecodes_chunk %>%
@@ -129,7 +129,7 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 			select(-person_id)  ->
 			to_glm
 
-		message('to_glm has dim: ', dim(to_glm))
+		# message('to_glm has dim: ', dim(to_glm))
 
 		safe_glm(to_glm) |>
 			pluck('result') |>
