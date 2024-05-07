@@ -6,7 +6,7 @@
 \usage{
 binary_phewas(
   covars,
-  phecodes,
+  phecode_counts,
   phecode_info,
   min_num_codes = 4,
   min_num_cases = 5
@@ -15,13 +15,13 @@ binary_phewas(
 \arguments{
 \item{covars}{the covariates (predictors) of the logistic glm}
 
-\item{phecodes}{table of phecodes}
-
 \item{phecode_info}{information abou the phecodes}
 
 \item{min_num_codes}{minimum number of codes a person must have to count as having the phecode}
 
 \item{min_num_cases}{minimum number of cases of a phecode that must be observed to consider it worth testing}
+
+\item{phecodes_counts}{a table of how many times each phecode was observed for each person}
 }
 \value{
 a table of results
