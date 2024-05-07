@@ -89,8 +89,8 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 
 		this_phecode = phecode_info_chunk$phecode[phecode_idx]
 		this_sex = phecode_info_chunk$sex[phecode_idx]
-		message('starting on ', phecode_idx, ' of ', nrow(phecode_info_chunk), '...')
-		message(this_phecode, ' applies to ', this_sex)
+		# message('starting on ', phecode_idx, ' of ', nrow(phecode_info_chunk), '...')
+		# message(this_phecode, ' applies to ', this_sex)
 
 		if (this_sex == 'Male')
 			this_covars = filter(covars, sex_male == TRUE)
@@ -107,27 +107,20 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 			pull(person_id) ->
 			pids_w_phecode
 
-		message('found ', length(pids_w_phecode), ' people with phecode')
+		# message('found ', length(pids_w_phecode), ' people with phecode')
 
 		if (length(pids_w_phecode) <= min_num_cases) {
-			message('too few people with this phecode')
 			next
 		}
 
-		safe_glm = safely(function(x) stats::lm(formula = has_phecode ~ has_any_dada2,
+		safe_glm = safely(function(x) stats::lm(formula = has_phecode ~ .,
 																						# family = 'binomial',
 																						data = x))
-		message('made safe_glm')
 
 		covars %>%
 			dplyr::mutate(has_phecode = person_id %in% pids_w_phecode) ->
 			to_glm
-		message('made to_glm')
-
-		# print(to_glm)
-		# cat(head(to_glm))
-		glimpse(to_glm)
-		# print(glimpse(to_glm))
+		# glimpse(to_glm)
 
 		safe_glm(to_glm) |>
 			pluck('result') |>
