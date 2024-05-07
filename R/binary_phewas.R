@@ -41,7 +41,7 @@ binary_phewas = function(covars,
 
 	if (num_cores == 1) {
 
-		results = list()
+		outer_results = list()
 		for (n in names(phecode_info_split)) {
 
 			message('starting on ', n)
@@ -51,9 +51,9 @@ binary_phewas = function(covars,
 				covars = covars,
 				min_num_cases = min_num_cases
 			) ->
-				results[[n]]
+				outer_results[[n]]
 		}
-		return(bind_rows(results))
+		return(bind_rows(outer_results))
 
 		# return(
 		# 	purrr::list_rbind(
@@ -84,7 +84,7 @@ binary_phewas = function(covars,
 
 binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, min_num_cases) {
 
-	results = list()
+	inner_results = list()
 	for (phecode_idx in 1:nrow(phecode_info_chunk)) {
 
 		this_phecode = phecode_info_chunk$phecode[phecode_idx]
@@ -135,8 +135,8 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 			dplyr::mutate(phecode = this_phecode) ->
 			result
 
-		results[[this_phecode]] = result
+		inner_results[[this_phecode]] = result
 	}
-	return(bind_rows(results))
+	return(bind_rows(inner_results))
 
 }
