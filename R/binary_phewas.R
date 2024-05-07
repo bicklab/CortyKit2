@@ -88,6 +88,8 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 
 		this_phecode = phecode_info_chunk$phecode[phecode_idx]
 		this_sex = phecode_info_chunk$sex[phecode_idx]
+		message('starting on ', phecode_idx, ' of ', nrow(phecode_info_chunk), '...')
+		message(this_phecode, ' applies to ', this_sex)
 
 		if (this_sex == 'Male')
 			this_covars = filter(covars, sex_male == TRUE)
@@ -104,8 +106,10 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 			pull(person_id) ->
 			pids_w_phecode
 
-		if (length(pids_w_phecode) <= min_num_cases)
+		if (length(pids_w_phecode) <= min_num_cases) {
+			message('too few people with this phecode')
 			next
+		}
 
 		safe_glm = safely(function(x) stats::glm(formula = has_phecode ~ ., family = 'binomial', data = x))
 
