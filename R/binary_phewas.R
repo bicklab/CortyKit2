@@ -40,18 +40,33 @@ binary_phewas = function(covars,
 		phecode_counts_split
 
 	if (num_cores == 1) {
-		return(
-			purrr::list_rbind(
-				purrr::map2(
-					.x = phecode_info_split,
-					.y = phecode_counts_split,
-					.f = binary_phewas_one_chunk,
-					covars = covars,
-					min_num_cases = min_num_cases,
-					.progress = TRUE
-				)
-			)
-		)
+
+		results = list()
+		for (n in names(phecode_info_split)) {
+
+			message('starting on ', n)
+			binary_phewas_one_chunk(
+				phecode_info_chunk = phecode_info_split[[n]],
+				phecodes_chunk = phecode_counts_split[[n]],
+				covars = covars,
+				min_num_cases = min_num_cases
+			) ->
+				results[[n]]
+		}
+		return(bind_rows(results))
+
+		# return(
+		# 	purrr::list_rbind(
+		# 		purrr::map2(
+		# 			.x = phecode_info_split,
+		# 			.y = phecode_counts_split,
+		# 			.f = binary_phewas_one_chunk,
+		# 			covars = covars,
+		# 			min_num_cases = min_num_cases,
+		# 			.progress = TRUE
+		# 		)
+		# 	)
+		# )
 	}
 
 	return(
