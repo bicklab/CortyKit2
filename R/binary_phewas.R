@@ -84,6 +84,7 @@ binary_phewas = function(covars,
 
 binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, min_num_cases) {
 
+	results = list()
 	for (phecode_idx in 1:nrow(phecode_info_chunk)) {
 
 		this_phecode = phecode_info_chunk$phecode[phecode_idx]
