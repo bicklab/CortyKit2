@@ -44,12 +44,13 @@ binary_phewas = function(covars,
 			.y = phecode_counts_split,
 			.f = binary_phewas_one_chunk,
 			covars = covars,
+			min_num_cases = min_num_cases,
 			.progress = TRUE
 		)
 	)
 }
 
-binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars) {
+binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, min_num_cases) {
 
 	for (phecode_idx in 1:nrow(phecode_info_chunk)) {
 
