@@ -92,9 +92,11 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 		if (length(pids_w_phecode) <= min_num_cases)
 			next
 
+		safe_glm = safely(function(x) stats::glm(formula = has_phecode ~ ., family = 'binomial', data = x))
+
 		covars %>%
 			dplyr::mutate(has_phecode = person_id %in% pids_w_phecode) |>
-			purrr::safely(function(x) stats::glm(formula = has_phecode ~ ., family = 'binomial', data = x)) |>
+			safe_glm() |>
 			broom::tidy() |>
 			dplyr::mutate(phecode = this_phecode) ->
 			results[[this_phecode]]
