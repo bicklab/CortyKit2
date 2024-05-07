@@ -77,7 +77,7 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 
 		covars %>%
 			mutate(has_phecode = person_id %in% pids_w_phecode) |>
-			glm(formula = has_phecode ~ .) |>
+			glm(formula = has_phecode ~ ., family = 'binomial') |>
 			broom::tidy() |>
 			mutate(phecode = this_phecode) ->
 			results[[this_phecode]]
