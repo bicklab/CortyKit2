@@ -123,7 +123,9 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 			to_glm
 		message('made to_glm')
 		print(to_glm)
-		cat(head(to_glm))
+		# cat(head(to_glm))
+		glimpse(to_glm)
+		print(glimpse(to_glm))
 
 		safe_glm(to_glm) |>
 			broom::tidy() |>
