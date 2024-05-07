@@ -113,7 +113,7 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 			next
 		}
 
-		safe_glm = safely(function(x) stats::lm(formula = has_phecode ~ .,
+		safe_glm = safely(function(x) stats::lm(formula = has_phecode ~ has_any_dada2,
 																						# family = 'binomial',
 																						data = x))
 		message('made safe_glm')
@@ -122,7 +122,8 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 			dplyr::mutate(has_phecode = person_id %in% pids_w_phecode) ->
 			to_glm
 		message('made to_glm')
-		glimpse(to_glm)
+		print(to_glm)
+		cat(head(to_glm))
 
 		safe_glm(to_glm) |>
 			broom::tidy() |>
