@@ -91,8 +91,8 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 
 		this_phecode = phecode_info_chunk$phecode[phecode_idx]
 		this_sex = phecode_info_chunk$sex[phecode_idx]
-		# message('starting on ', phecode_idx, ' of ', nrow(phecode_info_chunk), '...')
-		# message(this_phecode, ' applies to ', this_sex)
+		message('starting on ', phecode_idx, ' of ', nrow(phecode_info_chunk), '...')
+		message(this_phecode, ' applies to ', this_sex)
 
 		if (this_sex == 'Male')
 			this_covars = filter(covars, sex_male == TRUE)
@@ -103,11 +103,16 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 		if (this_sex == 'Both')
 			this_covars = covars
 
+		message('covars has dim: ', dim(this_covars))
+
 		# need to pull this into the map somehow!
 		phecodes_chunk %>%
 			filter(phecode == this_phecode) |>
-			pull(person_id) ->
+			pull(person_id) |>
+			unique() ->
 			pids_w_phecode
+
+		print(str(pids_w_phecode))
 
 		# message('found ', length(pids_w_phecode), ' people with phecode')
 
@@ -116,13 +121,17 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 		}
 
 		safe_glm = safely(function(x) stats::glm(formula = has_phecode ~ . ,
-																						family = 'binomial',
-																						data = x))
+																						 family = 'binomial',
+																						 data = x))
 
 		covars %>%
 			dplyr::mutate(has_phecode = person_id %in% pids_w_phecode) |>
-			select(-person_id)  |>
-			safe_glm(to_glm) |>
+			select(-person_id)  ->
+			to_glm
+
+		message('to_glm has dim: ', dim(to_glm))
+
+		safe_glm(to_glm) |>
 			pluck('result') |>
 			broom::tidy() |>
 			dplyr::mutate(phecode = this_phecode) ->
