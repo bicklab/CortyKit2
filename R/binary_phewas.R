@@ -122,12 +122,14 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 			dplyr::mutate(has_phecode = person_id %in% pids_w_phecode) ->
 			to_glm
 		message('made to_glm')
-		print(to_glm)
+
+		# print(to_glm)
 		# cat(head(to_glm))
 		glimpse(to_glm)
-		print(glimpse(to_glm))
+		# print(glimpse(to_glm))
 
 		safe_glm(to_glm) |>
+			pluck('result') |>
 			broom::tidy() |>
 			dplyr::mutate(phecode = this_phecode) ->
 			result
