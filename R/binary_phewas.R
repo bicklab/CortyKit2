@@ -15,8 +15,7 @@ binary_phewas = function(covars,
 												 min_num_cases = 5,
 												 use_all_cores = TRUE) {
 
-	# only use phecode counts that are in great enough quantity
-	# to be believed
+	# only believe person-phecode pairs that were observed enough times to believe
 	phecode_counts = filter(phecode_counts, phecode_count >= min_num_codes)
 
 	# cannot function if there are phecodes observed that lack info
@@ -25,9 +24,6 @@ binary_phewas = function(covars,
 
 	# only need info on observed phecodes
 	phecode_info = filter(phecode_info, phecode %in% unique(phecode_counts$phecode))
-
-	# set up multisession evaluation, then split the work across workers
-	future::plan(future::multisession)
 
 	phecode_info |>
 		mutate(phecode_prefix = str_sub(phecode, 1, 2)) |>
@@ -70,7 +66,9 @@ binary_phewas = function(covars,
 		# )
 	}
 
+	# set up multisession evaluation, then split the work across workers
 	message('Running PheWAS on ', future::availableCores() , ' cores.')
+	future::plan(future::multisession)
 	return(
 		furrr::future_map2_dfr(
 			.x = phecode_info_split,
@@ -95,10 +93,10 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 		# message(this_phecode, ' applies to ', this_sex)
 
 		if (this_sex == 'Male')
-			this_covars = filter(covars, sex_male == TRUE)
+			this_covars = filter(covars, bio_sex == 'XY')
 
 		if (this_sex == 'Female')
-			this_covars = filter(covars, sex_female == TRUE)
+			this_covars = filter(covars, bio_sex == 'XX')
 
 		if (this_sex == 'Both')
 			this_covars = covars
