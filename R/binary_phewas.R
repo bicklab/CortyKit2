@@ -112,7 +112,7 @@ binary_phewas_one_chunk = function(phecode_info_chunk, phecodes_chunk, covars, m
 			unique() ->
 			pids_w_phecode
 
-		print(str(pids_w_phecode))
+		# print(str(pids_w_phecode))
 
 		# message('found ', length(pids_w_phecode), ' people with phecode')
 
