@@ -77,7 +77,7 @@ get_control_ids = function(case_ids,
 
 	# try to match on a shorter and shorter list of variables until it works
 	# if it doesn't work even with 1 variable, return 'nomatch'
-	while(result == 'nomatch') {
+	while(idential(result, 'nomatch')) {
 
 		result = mo(case_ids = case_ids,
 								match_vars = match_variables,
