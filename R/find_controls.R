@@ -80,7 +80,7 @@ get_control_ids = function(case_ids,
 	while(result == 'nomatch') {
 
 		result = mo(case_ids = case_ids,
-								match_variables = match_variables,
+								match_vars = match_variables,
 								data = data,
 								ccr = control_case_ratio)
 
