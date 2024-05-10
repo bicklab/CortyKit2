@@ -13,10 +13,11 @@ phewas_case_control = function(
 		case_ids,
 		control_ids,
 		phecode_counts,
-		shrinkage_pseudocounts = 5) {
+		min_num_counts = 4,
+		shrinkage_pseudocounts = 2) {
 
-	person_id = case_or_control = 'fake_global'
-	phecode = phecode_count = 'fake_global'
+	# person_id = case_or_control = 'fake_global'
+	# phecode = phecode_count = 'fake_global'
 
   phecode_counts %>%
 		dplyr::filter(person_id %in% c(case_ids, control_ids)) %>%
@@ -24,16 +25,18 @@ phewas_case_control = function(
 		dplyr::select(person_id, case_or_control, phecode, phecode_count) %>%
 		dplyr::group_by(phecode) %>%
 		dplyr::summarise(
-      case_w = sum(phecode_count >= 2 & case_or_control == 'case'),
-      case_wo = length(case_ids) - sum(phecode_count >= 1 & case_or_control == 'case'),
-      control_w = sum(phecode_count >= 2 & case_or_control == 'control'),
-      control_wo = length(control_ids) - sum(phecode_count >= 1 & case_or_control == 'control')
+      case_w = sum(phecode_count >= min_num_counts & case_or_control == 'case'),
+      case_wo = length(case_ids) - case_w, #sum(phecode_count >= 1 & case_or_control == 'case'),
+      control_w = sum(phecode_count >= min_num_counts & case_or_control == 'control'),
+      control_wo = length(control_ids) - control_w #sum(phecode_count >= 1 & case_or_control == 'control')
     ) ->
     dx_code_scan
 
   ms = list()
   ors = list()
   for (i in 1:nrow(dx_code_scan)) {
+
+  	# controls_per_case = round(with(dx_code_scan, (control_wo[i] + control_w[i]) / (case_wo[i] + case_w[i])))
     ms[[i]] = matrix(
       c(dx_code_scan$control_wo[i],
         dx_code_scan$control_w[i],
