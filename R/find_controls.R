@@ -12,7 +12,7 @@ match_on = function(case_ids, data, match_vars, ccr) {
 		control_demand_df
 
 	data %>%
-		dplyr::filter(.data$person_id %nin% case_ids) %>%
+		dplyr::filter(!(.data$person_id %in% case_ids)) %>%
 		dplyr::group_by(!!!rlang::syms(match_vars)) %>%
 		dplyr::summarise(
 			num_controls_avail = dplyr::n(),
@@ -66,7 +66,7 @@ get_control_ids = function(case_ids,
 		if (!purrr::is_empty(intersect(case_ids, exclude_ids))) {
 			stop("There is overlap between case_id's and exclude_id's.")
 		}
-		covariates = dplyr::filter(covariates, .data$person_id %nin% exclude_ids)
+		covariates = dplyr::filter(covariates, !(.data$person_id %in% exclude_ids))
 	}
 	if (!all(match_variables %in% names(data))) {
 		stop("Some match_variable's aren't in data.")
@@ -77,7 +77,7 @@ get_control_ids = function(case_ids,
 
 	# try to match on a shorter and shorter list of variables until it works
 	# if it doesn't work even with 1 variable, return 'nomatch'
-	while(idential(result, 'nomatch')) {
+	while(identical(result, 'nomatch')) {
 
 		result = mo(case_ids = case_ids,
 								match_vars = match_variables,
