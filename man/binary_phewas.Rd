@@ -9,7 +9,8 @@ binary_phewas(
   phecode_counts,
   phecode_info,
   min_num_codes = 4,
-  min_num_cases = 5
+  min_num_cases = 5,
+  use_all_cores = TRUE
 )
 }
 \arguments{

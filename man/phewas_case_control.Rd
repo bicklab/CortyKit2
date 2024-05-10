@@ -8,7 +8,8 @@ phewas_case_control(
   case_ids,
   control_ids,
   phecode_counts,
-  shrinkage_pseudocounts = 5
+  min_num_counts = 4,
+  shrinkage_pseudocounts = 2
 )
 }
 \arguments{
