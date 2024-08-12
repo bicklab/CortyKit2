@@ -121,8 +121,7 @@ get_control_ids = function(case_ids,
 				.x = avail_control_pids,
 				.y = num_to_sample,
 				.f = sample,
-				replace = FALSE)) |>
-		select() ->
+				replace = FALSE)) ->
 		result
 
 	return(bind_rows(no_control_supply_cases, result) |> arrange(-num_controls_needed))
