@@ -1,40 +1,40 @@
-#' @importFrom rlang .data
-match_on = function(case_ids, data, match_vars, ccr) {
-
-	data |>
-		dplyr::filter(.data$person_id %in% case_ids) |>
-		dplyr::group_by(!!!rlang::syms(match_vars)) |>
-		dplyr::summarise(
-			num_controls_needed = ccr*dplyr::n(),
-			case_pids = list(.data$person_id),
-			.groups = 'drop'
-		) ->
-		control_demand_df
-
-	data |>
-		dplyr::filter(.data$person_id %nin% case_ids) |>
-		dplyr::group_by(!!!rlang::syms(match_vars)) |>
-		dplyr::summarise(
-			num_controls_avail = dplyr::n(),
-			avail_control_pids = list(.data$person_id),
-			.groups = 'drop'
-		) ->
-		control_supply_df
-
-	set.seed(1)
-
-	control_demand_df |>
-		dplyr::left_join(control_supply_df, by = dplyr::join_by(!!!rlang::syms(match_vars))) |>
-		# can use this to figure out if matching will succeed
-		# mutate(deficit = num_controls_needed - num_controls_avail) |> filter(deficit > 0) |> arrange(deficit)
-		dplyr::mutate(control_pids = purrr::map2_chr(
-			.x = .data$avail_control_pids,
-			.y = .data$num_controls_needed,
-			.f = sample,
-			replace = FALSE)) |>
-		dplyr::pull(.data$control_pids) |> unlist()  |>
-		return()
-}
+#' #' @importFrom rlang .data
+#' match_on = function(case_ids, data, match_vars, ccr) {
+#'
+#' 	data |>
+#' 		dplyr::filter(.data$person_id %in% case_ids) |>
+#' 		dplyr::group_by(!!!rlang::syms(match_vars)) |>
+#' 		dplyr::summarise(
+#' 			num_controls_needed = ccr*dplyr::n(),
+#' 			case_pids = list(.data$person_id),
+#' 			.groups = 'drop'
+#' 		) ->
+#' 		control_demand_df
+#'
+#' 	data |>
+#' 		dplyr::filter(.data$person_id %nin% case_ids) |>
+#' 		dplyr::group_by(!!!rlang::syms(match_vars)) |>
+#' 		dplyr::summarise(
+#' 			num_controls_avail = dplyr::n(),
+#' 			avail_control_pids = list(.data$person_id),
+#' 			.groups = 'drop'
+#' 		) ->
+#' 		control_supply_df
+#'
+#' 	set.seed(1)
+#'
+#' 	control_demand_df |>
+#' 		dplyr::left_join(control_supply_df, by = dplyr::join_by(!!!rlang::syms(match_vars))) |>
+#' 		# can use this to figure out if matching will succeed
+#' 		# mutate(deficit = num_controls_needed - num_controls_avail) |> filter(deficit > 0) |> arrange(deficit)
+#' 		dplyr::mutate(control_pids = purrr::map2_chr(
+#' 			.x = .data$avail_control_pids,
+#' 			.y = .data$num_controls_needed,
+#' 			.f = sample,
+#' 			replace = FALSE)) |>
+#' 		dplyr::pull(.data$control_pids) |> unlist()  |>
+#' 		return()
+#' }
 
 
 #' get control ids
