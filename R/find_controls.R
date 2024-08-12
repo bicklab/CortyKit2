@@ -2,21 +2,21 @@
 #' match_on = function(case_ids, data, match_vars, ccr) {
 #'
 #' 	data |>
-#' 		dplyr::filter(.data$person_id %in% case_ids) |>
+#' 		dplyr::filter(person_id %in% case_ids) |>
 #' 		dplyr::group_by(!!!rlang::syms(match_vars)) |>
 #' 		dplyr::summarise(
 #' 			num_controls_needed = ccr*dplyr::n(),
-#' 			case_pids = list(.data$person_id),
+#' 			case_pids = list(person_id),
 #' 			.groups = 'drop'
 #' 		) ->
 #' 		control_demand_df
 #'
 #' 	data |>
-#' 		dplyr::filter(.data$person_id %nin% case_ids) |>
+#' 		dplyr::filter(person_id %nin% case_ids) |>
 #' 		dplyr::group_by(!!!rlang::syms(match_vars)) |>
 #' 		dplyr::summarise(
 #' 			num_controls_avail = dplyr::n(),
-#' 			avail_control_pids = list(.data$person_id),
+#' 			avail_control_pids = list(person_id),
 #' 			.groups = 'drop'
 #' 		) ->
 #' 		control_supply_df
@@ -28,11 +28,11 @@
 #' 		# can use this to figure out if matching will succeed
 #' 		# mutate(deficit = num_controls_needed - num_controls_avail) |> filter(deficit > 0) |> arrange(deficit)
 #' 		dplyr::mutate(control_pids = purrr::map2_chr(
-#' 			.x = .data$avail_control_pids,
-#' 			.y = .data$num_controls_needed,
+#' 			.x = avail_control_pids,
+#' 			.y = num_controls_needed,
 #' 			.f = sample,
 #' 			replace = FALSE)) |>
-#' 		dplyr::pull(.data$control_pids) |> unlist()  |>
+#' 		dplyr::pull(control_pids) |> unlist()  |>
 #' 		return()
 #' }
 
@@ -68,7 +68,7 @@ get_control_ids = function(case_ids,
 			if (!purrr::is_empty(intersect(case_ids, exclude_ids))) {
 				stop("There is overlap between case_id's and exclude_id's.")
 			}
-			data = dplyr::filter(data, .data$person_id %nin% exclude_ids)
+			data = dplyr::filter(data, person_id %nin% exclude_ids)
 		}
 		if (!all(match_variables %in% names(data))) {
 			stop("Some match_variable's aren't in data.")
@@ -77,22 +77,22 @@ get_control_ids = function(case_ids,
 
 	# establish what controls are needed
 	data |>
-		dplyr::filter(.data$person_id %in% case_ids) |>
+		dplyr::filter(person_id %in% case_ids) |>
 		dplyr::group_by(!!!rlang::syms(match_variables)) |>
 		dplyr::summarise(
 			num_controls_needed = control_case_ratio*dplyr::n(),
-			case_pids = list(.data$person_id),
+			case_pids = list(person_id),
 			.groups = 'drop'
 		) ->
 		control_demand_df
 
 	# establish what controls are available
 	data |>
-		dplyr::filter(.data$person_id %nin% case_ids) |>
+		dplyr::filter(person_id %nin% case_ids) |>
 		dplyr::group_by(!!!rlang::syms(match_variables)) |>
 		dplyr::summarise(
 			num_controls_avail = dplyr::n(),
-			avail_control_pids = list(.data$person_id),
+			avail_control_pids = list(person_id),
 			.groups = 'drop'
 		) ->
 		control_supply_df
@@ -105,13 +105,25 @@ get_control_ids = function(case_ids,
 		# can use this to figure out if matching will succeed
 		# mutate(deficit = num_controls_needed - num_controls_avail) |> filter(deficit > 0) |> arrange(deficit)
 		dplyr::mutate(
-			complete_match = .data$num_controls_needed <= .data$num_controls_avail,
-			control_pids = purrr::map2_chr(
-				.x = .data$avail_control_pids,
-				.y = min(.data$num_controls_needed, .data$num_controls_avail),
+			num_controls_avail = ifelse(is.na(num_controls_avail), 0, num_controls_avail),
+			control_excess = num_controls_avail - num_controls_needed) ->
+		control_supply_and_demand
+
+	control_supply_and_demand |>
+		filter(num_controls_avail == 0) ->
+		no_control_supply_cases
+
+	control_supply_and_demand |>
+		filter(num_controls_avail > 0) |>
+		mutate(num_to_sample = pmin(num_controls_needed, num_controls_avail, na.rm = TRUE)) |>
+		mutate(
+			control_pids = purrr::map2(
+				.x = avail_control_pids,
+				.y = num_to_sample,
 				.f = sample,
-				replace = FALSE)) ->
+				replace = FALSE)) |>
+		select() ->
 		result
 
-	return(result)
+	return(bind_rows(no_control_supply_cases, result) |> arrange(-num_controls_needed))
 }
