@@ -68,7 +68,7 @@ get_control_ids = function(case_ids,
 			if (!purrr::is_empty(intersect(case_ids, exclude_ids))) {
 				stop("There is overlap between case_id's and exclude_id's.")
 			}
-			covariates = dplyr::filter(covariates, .data$person_id %nin% exclude_ids)
+			data = dplyr::filter(data, .data$person_id %nin% exclude_ids)
 		}
 		if (!all(match_variables %in% names(data))) {
 			stop("Some match_variable's aren't in data.")
