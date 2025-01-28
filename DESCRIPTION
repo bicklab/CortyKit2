@@ -16,17 +16,20 @@ BugReports: https://github.com/bicklab/CortyKit2/issues
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-Depends: 
+Imports: 
     arrow,
     Biostrings,
     broom,
     data.table,
     dplyr,
     ggplot2,
+    ggpubr,
     ggsurvfit,
     glmnet,
     glue,
     graphics,
+    knitr,
+    lubridate,
     magrittr,
     naniar,
     purrr,
