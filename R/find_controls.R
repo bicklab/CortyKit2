@@ -1,94 +1,115 @@
-#' @importFrom rlang .data
-match_on = function(case_ids, data, match_vars, ccr) {
-
+#' Calculate required controls for each matching group
+get_control_demand = function(data, case_ids, match_vars, ccr) {
 	data %>%
-    dplyr::filter(.data$person_id %in% case_ids) %>%
+		dplyr::filter(.data$person_id %in% case_ids) %>%
 		dplyr::group_by(!!!rlang::syms(match_vars)) %>%
 		dplyr::summarise(
-      num_controls_needed = ccr*dplyr::n(),
-      case_pids = list(.data$person_id),
-      .groups = 'drop'
-    ) ->
-    control_demand_df
-
-  data %>%
-  	dplyr::filter(.data$person_id %nin% case_ids) %>%
-  	dplyr::group_by(!!!rlang::syms(match_vars)) %>%
-  	dplyr::summarise(
-      num_controls_avail = dplyr::n(),
-      avail_control_pids = list(.data$person_id),
-      .groups = 'drop'
-    ) ->
-    control_supply_df
-
-  set.seed(1)
-
-  control_demand_df %>%
-  	dplyr::left_join(control_supply_df, by = dplyr::join_by(!!!rlang::syms(match_vars))) %>%
-    # can use this to figure out if matching will succeed
-    # mutate(deficit = num_controls_needed - num_controls_avail) %>% filter(deficit > 0) %>% arrange(deficit)
-  	dplyr::mutate(control_pids = purrr::map2_chr(
-  		.x = .data$avail_control_pids,
-  		.y = .data$num_controls_needed,
-  		.f = sample,
-  		replace = FALSE)) %>%
-    dplyr::pull(.data$control_pids) %>% unlist()  %>%
-  	return()
+			num_controls_needed = ccr*dplyr::n(),
+			case_pids = list(.data$person_id),
+			.groups = 'drop'
+		)
 }
 
+#' Calculate available controls for each matching group
+get_control_supply = function(data, case_ids, match_vars) {
+	data %>%
+		dplyr::filter(.data$person_id %nin% case_ids) %>%
+		dplyr::group_by(!!!rlang::syms(match_vars)) %>%
+		dplyr::summarise(
+			num_controls_avail = dplyr::n(),
+			avail_control_pids = list(.data$person_id),
+			.groups = 'drop'
+		)
+}
 
-#' get control ids
-#'
-#' @param case_ids the case ids
-#' @param match_variables vector of variables to match on in order from most important to least
-#' @param data data used for matching, with id column labeled 'person_id'
-#' @param exclude_ids ids that user does not want to consider as possible controls
-#' @param control_case_ratio number of controls per case, default to 10
-#' @param verbose whether to output what ends up getting matched on
-#'
-#' @return a vector of control ids
+#' Check if matching is feasible and return details of any problems
+check_matching_feasibility = function(demand_df, supply_df, match_vars) {
+	matching_check = demand_df %>%
+		dplyr::left_join(supply_df, by = dplyr::join_by(!!!rlang::syms(match_vars))) %>%
+		dplyr::mutate(
+			deficit = num_controls_needed - num_controls_avail,
+			matching_group = paste(!!!rlang::syms(match_vars), sep = ", ")
+		)
+
+	problem_groups = matching_check %>%
+		dplyr::filter(deficit > 0) %>%
+		dplyr::arrange(desc(deficit))
+
+	if(nrow(problem_groups) > 0) {
+		list(
+			feasible = FALSE,
+			problem_groups = problem_groups
+		)
+	} else {
+		list(
+			feasible = TRUE,
+			matching_data = matching_check
+		)
+	}
+}
+
+#' Sample controls for each matching group
+sample_controls = function(matching_data) {
+	set.seed(1)
+	matching_data %>%
+		dplyr::mutate(
+			sampled_controls = purrr::map2(
+				.x = avail_control_pids,
+				.y = num_controls_needed,
+				.f = function(x, y) sample(x, size = y, replace = FALSE)
+			)
+		) %>%
+		dplyr::pull(sampled_controls) %>%
+		unlist()
+}
+
+#' Main function to get control IDs
 #' @export
 get_control_ids = function(case_ids,
 													 match_variables,
 													 data,
 													 exclude_ids = NULL,
-													 control_case_ratio = 5,
-													 verbose = FALSE) {
-
-	# check inputs
+													 control_case_ratio = 5) {
+	# Input validation
 	if (!all(case_ids %in% data$person_id)) {
 		stop("Some case_id's aren't in data.")
 	}
+
 	if (!is.null(exclude_ids)) {
 		if (!all(exclude_ids %in% data$person_id)) {
 			stop("Some exclude_id's aren't in data.")
 		}
 		if (!purrr::is_empty(intersect(case_ids, exclude_ids))) {
-      stop("There is overlap between case_id's and exclude_id's.")
-    }
-    covariates = dplyr::filter(covariates, .data$person_id %nin% exclude_ids)
+			stop("There is overlap between case_id's and exclude_id's.")
+		}
+		data = dplyr::filter(data, .data$person_id %nin% exclude_ids)
 	}
+
 	if (!all(match_variables %in% names(data))) {
 		stop("Some match_variable's aren't in data.")
 	}
 
-  mo = purrr::possibly(match_on, otherwise = 'nomatch')
-  result = 'nomatch'
+	# Get demand and supply
+	demand_df = get_control_demand(data, case_ids, match_variables, control_case_ratio)
+	supply_df = get_control_supply(data, case_ids, match_variables)
 
-  # try to match on a shorter and shorter list of variables until it works
-  # if it doesn't work even with 1 variable, return 'nomatch'
-  while(result == 'nomatch') {
+	# Check feasibility
+	feasibility = check_matching_feasibility(demand_df, supply_df, match_variables)
 
-  	result = mo(case_ids = case_ids,
-  							match_variables = match_variables,
-  							data = data,
-  							ccr = control_case_ratio)
+	if(!feasibility$feasible) {
+		error_msg = sprintf(
+			"Insufficient controls for %d matching groups:\n%s",
+			nrow(feasibility$problem_groups),
+			paste(sprintf(
+				"  Group '%s': needs %d controls, only %d available",
+				feasibility$problem_groups$matching_group,
+				feasibility$problem_groups$num_controls_needed,
+				feasibility$problem_groups$num_controls_avail
+			), collapse = "\n")
+		)
+		stop(error_msg)
+	}
 
-  	match_variables = match_variables[-length(match_variables)]
-  	if (length(match_variables) == 0) {
-  		break
-  	}
-  }
-
-  return(result)
+	# Sample controls
+	sample_controls(feasibility$matching_data)
 }

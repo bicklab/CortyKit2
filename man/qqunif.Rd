@@ -7,7 +7,7 @@
 qqunif(ps)
 }
 \arguments{
-\item{ps}{the p-values}
+\item{ps}{the p-values (between 0 and 1)}
 }
 \value{
 a QQ plot

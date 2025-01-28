@@ -6,7 +6,7 @@
 #' @return terminal output from gsutil command
 #' @export
 gsutil = function(text, echo = FALSE) {
-  text = glue::glue('gsutil -u {GOOGLE_PROJECT} ', text)
+  text = glue::glue('gsutil -u $GOOGLE_PROJECT ', text)
   if (echo) base::print(text)
   system(command = text, intern = TRUE)
 }
@@ -47,7 +47,7 @@ lcprefix_val = function(s1, s2) {
 #'
 #' @return terminal output from gsutil command
 #' @export
-gscp = function(src, dest, echo = TRUE) {
+gscp = function(src, dest = '.', echo = TRUE) {
 	gsutil(paste('cp', src, dest))
 }
 
