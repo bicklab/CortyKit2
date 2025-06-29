@@ -30,3 +30,25 @@ lu = function(x) {
 '%nin%' = function(a, b) {
   (!(a %in% b))
 }
+
+#' @title is_not_na
+#'
+#' @param x a vector
+#'
+#' @returns the opposite of is.na() of the fector
+#' @export
+is_not_na = function(x) {
+	!is.na(x)
+}
+
+
+#' @title years_between
+#'
+#' @param start start date
+#' @param end end date
+#'
+#' @returns the number of years between the two dates
+#' @export
+years_between = function(start, end) {
+	as.numeric(difftime(end, start, units = "days"))/365.24
+}

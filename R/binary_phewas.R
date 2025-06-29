@@ -10,10 +10,10 @@ binary_phewas = function(covars, phecodes, phecode_info, min_num_codes = 4) {
 
 	# loop over phecodes listed in INFO
 	results = list()
-	for (this_phecode_idx in 1:nrow(phecode_info)) {
+	for (phecode_idx in 1:nrow(phecode_info)) {
 
-		this_phecode = phecode_info$phecode[this_phecode_idx]
-		this_sex = phecode_info$sex[this_phecode_idx]
+		this_phecode = phecode_info$phecode[phecode_idx]
+		this_sex = phecode_info$sex[phecode_idx]
 
 		if (this_sex == 'Male')
 			this_covars = filter(covars, sex_male == TRUE)
@@ -24,8 +24,8 @@ binary_phewas = function(covars, phecodes, phecode_info, min_num_codes = 4) {
 		if (this_sex == 'Both')
 			this_covars = covars
 
-		phecodes %>%
-			filter(phecode == this_phecode, phecode_count >= min_num_codes) |>
+		phecodes |>
+			filter(phecodeX == this_phecode, phecode_count >= min_num_codes) |>
 			pull(person_id) ->
 			pids_w_phecode
 

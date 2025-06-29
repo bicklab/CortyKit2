@@ -8,7 +8,12 @@
 #' @return p value of binomial test
 #' @export
 binom_p_val = function(a, b = n - a, n = a + b, null_prob = 0.5) {
-  2 * pbinom(q = pmin.int(a, b), size = n, prob = null_prob) - (a == b)*dbinom(x = a, size = n, prob = null_prob)
+
+  # pbinom function does not seem to be vectorized over lower.tail arg
+	need_lower_tail = (a/n < null_prob)
+	lower_tail_prob = pbinom(q = a, size = n, prob = null_prob, lower.tail = TRUE)
+  upper_tail_prob = pbinom(q = a, size = n, prob = null_prob, lower.tail = FALSE)
+  return(ifelse(need_lower_tail, lower_tail_prob, upper_tail_prob))
 }
 
 
