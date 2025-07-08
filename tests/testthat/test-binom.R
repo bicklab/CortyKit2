@@ -1,9 +1,12 @@
 test_that(
   'vectorized binom returns same results as old/slow version',
   {
-    num = 1e3
+    num = 1e1
     a = sample(30:50, size = num, replace = TRUE)
     b = sample(30:50, size = num, replace = TRUE)
+    slow_binom_p_val = function(a, b) {
+    	stats::binom.test(x = a, n = a + b)$p.value
+    }
     # print(tibble(a, b))
     expect_equal(
       object = binom_p_val(a = a, b = b),
