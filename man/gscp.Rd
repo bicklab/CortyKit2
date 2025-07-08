@@ -4,7 +4,7 @@
 \alias{gscp}
 \title{gscp}
 \usage{
-gscp(src, dest, echo = TRUE)
+gscp(src, dest = ".", echo = TRUE)
 }
 \arguments{
 \item{src}{source}

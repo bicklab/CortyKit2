@@ -2,33 +2,16 @@
 % Please edit documentation in R/find_controls.R
 \name{get_control_ids}
 \alias{get_control_ids}
-\title{get control ids}
+\title{Main function to get control IDs}
 \usage{
 get_control_ids(
   case_ids,
   match_variables,
   data,
   exclude_ids = NULL,
-  control_case_ratio = 5,
-  verbose = FALSE
+  control_case_ratio = 5
 )
 }
-\arguments{
-\item{case_ids}{the case ids}
-
-\item{match_variables}{vector of variables to match on in order from most important to least}
-
-\item{data}{data used for matching, with id column labeled 'person_id'}
-
-\item{exclude_ids}{ids that user does not want to consider as possible controls}
-
-\item{control_case_ratio}{number of controls per case, default to 10}
-
-\item{verbose}{whether to output what ends up getting matched on}
-}
-\value{
-a vector of control ids
-}
 \description{
-get control ids
+Main function to get control IDs
 }
