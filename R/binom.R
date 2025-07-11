@@ -2,21 +2,15 @@
 #'
 #' @param a number of successes
 #' @param b number of failures (defaults to n - a)
-#' @param n number of trials (defaults to a + b)
-#' @param null_prob prob of success under the null hypothesis, default 0.5
 #'
 #' @return p value of binomial test
 #' @export
-binom_p_val = function(a, b = n - a, n = a + b, null_prob = 0.5) {
+binom_05_p_val = function(a, b) {
 
-  # pbinom function does not seem to be vectorized over lower.tail arg
-	need_lower_tail = (a/n < null_prob)
-	lower_tail_prob = pbinom(q = a, size = n, prob = null_prob, lower.tail = TRUE)
-  upper_tail_prob = pbinom(q = a, size = n, prob = null_prob, lower.tail = FALSE)
-  return(ifelse(need_lower_tail, lower_tail_prob, upper_tail_prob))
-}
-
-
-slow_binom_p_val = function(a, b = n - a, n = a + b) {
-  stats::binom.test(x = a, n = a + b)$p.value
+	n = a + b
+	center <- floor(n / 2)
+	lower_tail <- pbinom(a,     n, 0.5, lower.tail = TRUE)
+	upper_tail <- pbinom(a - 1, n, 0.5, lower.tail = FALSE)
+	adj = ifelse(a == b, dbinom(a, n, 0.5), 0)
+	return(2 * pmin(lower_tail, upper_tail) - adj)
 }

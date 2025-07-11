@@ -3,7 +3,7 @@
 export("%>%")
 export("%nin%")
 export(.onLoad)
-export(binom_p_val)
+export(binom_05_p_val)
 export(checkpoint)
 export(commonest_values)
 export(filter_sm_one_gene)
