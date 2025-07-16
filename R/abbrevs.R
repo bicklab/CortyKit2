@@ -52,3 +52,8 @@ is_not_na = function(x) {
 years_between = function(start, end) {
 	as.numeric(difftime(end, start, units = "days"))/365.24
 }
+
+
+#' @title typos
+#' @export
+filteR = dplyr::filter()
