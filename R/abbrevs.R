@@ -4,8 +4,8 @@
 #'
 #' @return hard to explain, but it's table(table(x))
 #' @export
-tt = function(x) {
-	table(table(x))
+tt <- function(x) {
+  table(table(x))
 }
 
 #' @title lu: length of unique
@@ -14,8 +14,8 @@ tt = function(x) {
 #'
 #' @return the number of unique values in the vector
 #' @export
-lu = function(x) {
-	length(unique(x))
+lu <- function(x) {
+  length(unique(x))
 }
 
 # g = pillar::glimpse
@@ -27,7 +27,7 @@ lu = function(x) {
 #'
 #' @return a binary vector of whether each entry in A is not in B (the converse of %in%)
 #' @export
-'%nin%' = function(a, b) {
+"%nin%" <- function(a, b) {
   (!(a %in% b))
 }
 
@@ -37,8 +37,8 @@ lu = function(x) {
 #'
 #' @returns the opposite of is.na() of the fector
 #' @export
-is_not_na = function(x) {
-	!is.na(x)
+is_not_na <- function(x) {
+  !is.na(x)
 }
 
 
@@ -49,11 +49,11 @@ is_not_na = function(x) {
 #'
 #' @returns the number of years between the two dates
 #' @export
-years_between = function(start, end) {
-	as.numeric(difftime(end, start, units = "days"))/365.24
+years_between <- function(start, end) {
+  as.numeric(difftime(end, start, units = "days")) / 365.24
 }
 
 
 #' @title typos
 #' @export
-filteR = dplyr::filter()
+filteR <- dplyr::filter

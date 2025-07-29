@@ -2,16 +2,30 @@
 % Please edit documentation in R/find_controls.R
 \name{get_control_ids}
 \alias{get_control_ids}
-\title{Main function to get control IDs}
+\title{Get control_id's from a dataset that match the case_id's on match_variables.}
 \usage{
 get_control_ids(
   case_ids,
   match_variables,
   data,
-  exclude_ids = NULL,
+  sampling_seed = 37232,
   control_case_ratio = 5
 )
 }
+\arguments{
+\item{case_ids}{the IDs of the cases}
+
+\item{match_variables}{the variables to match on}
+
+\item{data}{The data about cases and potential controls.
+It must contain match_variables as columns and have a column called
+'person_id' that contains all values of case_ids}
+
+\item{sampling_seed}{seed used for random sampling of controls from data
+(default is ZIP code of VUMC)}
+
+\item{control_case_ratio}{how many controls do we want per case?}
+}
 \description{
-Main function to get control IDs
+Get control_id's from a dataset that match the case_id's on match_variables.
 }
