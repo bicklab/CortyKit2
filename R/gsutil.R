@@ -6,7 +6,7 @@
 #' @return terminal output from gsutil command
 #' @export
 gsutil = function(text, echo = FALSE) {
-  text = glue::glue('gsutil -u $GOOGLE_PROJECT ', text)
+  text = glue::glue('gsutil -u $GOOGLE_PROJECT -m ', text)
   if (echo) base::print(text)
   system(command = text, intern = TRUE)
 }
