@@ -22,9 +22,9 @@ get_control_supply = function(data, case_ids, match_vars) {
 		)
 }
 
-sample_controls = function(demand_df, supply_df, seed) {
+sample_controls = function(demand_df, supply_df, seed, ccr) {
 	set.seed(seed)
-	match_vars = intersect(names(demand_df), names(supply_df))
+	match_vars = setdiff(names(demand_df), c("num_controls_needed", "case_pids"))
 
 	joined = dplyr::left_join(
 		demand_df,
@@ -32,31 +32,33 @@ sample_controls = function(demand_df, supply_df, seed) {
 		by = dplyr::join_by(!!!rlang::syms(match_vars))
 	)
 
-	sample_or_fail = function(num_controls_needed, avail_control_pids, ...) {
-		row = list(...)
-		group = row[match_vars]
-		fail_key = paste(group, collapse = ", ")
+	sample_and_assign = function(num_controls_needed, avail_control_pids, case_pids, ...) {
+		dots = list(...)
+		fail_key = paste(unlist(dots[match_vars]), collapse = ", ")
 
-		if (length(avail_control_pids) < num_controls_needed) {
+		n_avail = length(avail_control_pids %||% integer(0))
+		if (n_avail < num_controls_needed) {
 			stop(glue::glue(
-				"Sampling failed for group [{fail_key}]: need {num_controls_needed}, but only {length(avail_control_pids)} available."
+				"Sampling failed for group [{fail_key}]: need {num_controls_needed}, but only {n_avail} available."
 			))
 		}
 
-		sample(avail_control_pids, size = num_controls_needed, replace = FALSE)
+		sampled = sample(avail_control_pids, size = num_controls_needed, replace = FALSE)
+
+		tibble::tibble(
+			case_id   = rep(case_pids, each = ccr),
+			control_id = sampled
+		)
 	}
 
-	purrr::pmap(
-		.l = joined,
-		.f = sample_or_fail
-	) |>
-		unlist()
+	purrr::pmap(joined, sample_and_assign) |>
+		dplyr::bind_rows()
 }
 
 
 
 
-#' @title Get control_id's from a dataset that match the case_id's on match_variables.
+#' @title Match cases to controls from a dataset based on matching variables.
 #'
 #' @param case_ids the IDs of the cases
 #' @param match_variables the variables to match on
@@ -67,12 +69,15 @@ sample_controls = function(demand_df, supply_df, seed) {
 #' @param sampling_seed seed used for random sampling of controls from data
 #'		(default is ZIP code of VUMC)
 #'
+#' @return A tibble with columns `case_id` and `control_id`, one row per
+#'   matched case-control pair. Each control appears at most once.
+#'
 #' @export
-get_control_ids = function(case_ids,
-													 match_variables,
-													 data,
-													 sampling_seed = 37232,
-													 control_case_ratio = 5) {
+match_cases_to_controls = function(case_ids,
+																	 match_variables,
+																	 data,
+																	 sampling_seed = 37232,
+																	 control_case_ratio = 5) {
 
 	if (!all(case_ids %in% data$person_id)) {
 		stop("Some case_id's aren't in data.")
@@ -85,5 +90,5 @@ get_control_ids = function(case_ids,
 	demand_df = get_control_demand(data, case_ids, match_variables, control_case_ratio)
 	supply_df = get_control_supply(data, case_ids, match_variables)
 
-	return(sample_controls(demand_df, supply_df, sampling_seed))
+	return(sample_controls(demand_df, supply_df, sampling_seed, control_case_ratio))
 }

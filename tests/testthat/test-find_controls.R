@@ -1,5 +1,5 @@
 test_that(
-	"get_control_ids() succeeds when it should",
+	"match_cases_to_controls() succeeds when it should",
 	{
 		n = 100
 		data = tibble::tibble(
@@ -7,15 +7,20 @@ test_that(
 			age = rep(c(40, 50, 60, 70, 80), n/5),
 			sex = rep(c('F', 'M'), n/2)
 		)
-		control_ids = get_control_ids(case_ids = 1:10, match_variables = c('age', 'sex'), data = data)
-		expect_no_error(get_control_ids(case_ids = 1:10, match_variables = c('age', 'sex'), data = data))
-		expect_type(control_ids, 'integer')
-		expect_equal(length(control_ids), 50)
+		result = match_cases_to_controls(case_ids = 1:10, match_variables = c('age', 'sex'), data = data)
+		expect_no_error(match_cases_to_controls(case_ids = 1:10, match_variables = c('age', 'sex'), data = data))
+		expect_s3_class(result, 'tbl_df')
+		expect_named(result, c('case_id', 'control_id'))
+		expect_equal(nrow(result), 50)
+		# each control should appear at most once
+		expect_equal(length(unique(result$control_id)), nrow(result))
+		# every case_id in result should be one of the requested case_ids
+		expect_true(all(result$case_id %in% 1:10))
 	}
 )
 
 test_that(
-	"get_control_ids() fails when it should",
+	"match_cases_to_controls() fails when it should",
 	{
 		n = 100
 		data = tibble::tibble(
@@ -23,9 +28,8 @@ test_that(
 			age = rep(c(40, 50, 60, 70, 80), n/5),
 			sex = rep(c('F', 'M'), n/2)
 		)
-		expect_error(get_control_ids(case_ids = 1:20, match_variables = c('age', 'sex'), data = data))
-		expect_error(get_control_ids(case_ids = c('apple', 'banana'), match_variables = c('age', 'sex'), data = data))
-		expect_error(get_control_ids(case_ids = 1:10, match_variables = c('age', 'height'), data = data))
+		expect_error(match_cases_to_controls(case_ids = 1:20, match_variables = c('age', 'sex'), data = data))
+		expect_error(match_cases_to_controls(case_ids = c('apple', 'banana'), match_variables = c('age', 'sex'), data = data))
+		expect_error(match_cases_to_controls(case_ids = 1:10, match_variables = c('age', 'height'), data = data))
 	}
 )
-
